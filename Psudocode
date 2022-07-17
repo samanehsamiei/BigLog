@@ -1,0 +1,13 @@
+import org.apache.spark.mllib.fpm.PrefixSpan
+val raw = sc.textFile("file:/DataFinal.txt")
+val splited = raw.map(x=> (x.split("\\|")(0),x.split("\\|")(1)))
+val bagOfPagesWithIP = splited.reduceByKey((a,b)=> a+" "+b)
+val bagOfPages = bagOfPagesWithIP.map{case(a,b)=>b}
+val sequences = bagOfPages.map(s=>Array(s.split(" " )))
+val prefixSpan = new PrefixSpan().setMinSupport()
+val model = prefixSpan.run(sequences)
+model.freqSequences.collect().foreach { freqSequence =>
+println(
+freqSequence.sequence.map(_.mkString("[", ", ", "]"))
+.mkString("[", ", ", "]") +", " + freqSequence.freq)
+}
